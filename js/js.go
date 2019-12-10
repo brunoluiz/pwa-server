@@ -1,0 +1,43 @@
+package js
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
+)
+
+func RenderGlobalsFromEnv(prefix string, key string) string {
+	values := []string{}
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		key := pair[0]
+		value := pair[1]
+
+		if !strings.HasPrefix(key, prefix+"_") {
+			continue
+		}
+
+		if value == "true" || value == "false" {
+			values = append(values, key+":"+value)
+			continue
+		}
+
+		values = append(values, key+":\""+value+"\"")
+	}
+
+	return "window." + key + "={" + strings.Join(values, ",") + "}"
+}
+
+type PwaGlobals struct {
+	Prefix string
+	Key    string
+}
+
+func Serve(prefix string, key string) *PwaGlobals {
+	return &PwaGlobals{prefix, key}
+}
+
+func (pwa *PwaGlobals) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, RenderGlobalsFromEnv(pwa.Prefix, pwa.Key))
+}
