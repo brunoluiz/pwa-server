@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/brunoluiz/go-pwa-server/htmlmod"
@@ -11,7 +10,6 @@ import (
 	"github.com/brunoluiz/go-pwa-server/middlewares"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
-	"golang.org/x/net/html"
 )
 
 func main() {
@@ -20,7 +18,7 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:   "js-env-prefix",
-				Usage:  "Value to get JS env variables",
+				Usage:  "Dynamic JS env variables prefix",
 				Value:  "CONFIG_",
 				EnvVar: "JS_ENV_PREFIX",
 			},
@@ -32,23 +30,23 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:   "js-env-route",
-				Usage:  "Where window.config js is exposed",
+				Usage:  "JS config route",
 				Value:  "/__/config.js",
 				EnvVar: "JS_ENV_ROUTE",
 			},
 			&cli.BoolFlag{
 				Name:   "no-cache",
-				Usage:  "No cache headers",
+				Usage:  "Add no-cache headers",
 				EnvVar: "NO_CACHE",
 			},
 			&cli.BoolFlag{
-				Name:   "compress",
-				Usage:  "Allow response gzip compression",
-				EnvVar: "COMPRESS",
+				Name:   "compression",
+				Usage:  "Enable gzip compression",
+				EnvVar: "COMPRESSION",
 			},
 			&cli.BoolFlag{
 				Name:   "cors",
-				Usage:  "Set CORS Origin, Method and Headers to be *",
+				Usage:  "Add CORS Origin, Method and Headers as *",
 				EnvVar: "CORS",
 			},
 			&cli.StringFlag{
@@ -79,41 +77,9 @@ func main() {
 }
 
 func serve(c *cli.Context) error {
-	fs := http.FileServer(http.Dir(c.String("dir")))
+	h := htmlmod.Serve(c.String("dir"), c.String("base-url"))
 
-	var h http.Handler
-	h = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		hasTrailing := r.URL.Path[len(r.URL.Path)-1:] == "/"
-		if !strings.Contains(r.URL.Path, "htm") && !hasTrailing {
-			fs.ServeHTTP(w, r)
-			return
-		}
-
-		path := c.String("dir") + r.URL.Path
-		if hasTrailing {
-			path += "index.html"
-		}
-
-		f, err := os.Open(path)
-		if err != nil {
-			panic("Fail to open")
-		}
-		defer f.Close()
-
-		doc, err := html.Parse(f)
-		if err != nil {
-			panic("Fail to parse")
-		}
-
-		htmlmod.EnhanceHTML(doc, &htmlmod.PWASettings{
-			BaseURL: c.String("base-url"),
-		})
-		if err := html.Render(w, doc); err != nil {
-			panic(err)
-		}
-	})
-
-	if c.Bool("compress") {
+	if c.Bool("compression") {
 		logrus.Info("Compression enabled")
 		h = gziphandler.GzipHandler(h)
 	}

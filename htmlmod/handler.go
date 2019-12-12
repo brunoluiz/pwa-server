@@ -1,4 +1,4 @@
-package httpmod
+package htmlmod
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-func ServeStatic(dir string, baseUrl string) http.Handler {
+func Serve(dir string, baseUrl string) http.Handler {
 	fs := http.FileServer(http.Dir(dir))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
