@@ -14,7 +14,7 @@ func RenderGlobalsFromEnv(prefix string, key string) string {
 		key := pair[0]
 		value := pair[1]
 
-		if !strings.HasPrefix(key, prefix+"_") {
+		if !strings.HasPrefix(key, prefix) {
 			continue
 		}
 

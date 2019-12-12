@@ -5,8 +5,10 @@ import (
 	"os"
 	"strings"
 
-	htmlmod "github.com/brunoluiz/go-pwa-server/htmlmod/html.go"
+	"github.com/NYTimes/gziphandler"
+	"github.com/brunoluiz/go-pwa-server/htmlmod"
 	"github.com/brunoluiz/go-pwa-server/js"
+	"github.com/brunoluiz/go-pwa-server/middlewares"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"golang.org/x/net/html"
@@ -19,37 +21,52 @@ func main() {
 			&cli.StringFlag{
 				Name:   "js-env-prefix",
 				Usage:  "Value to get JS env variables",
-				Value:  "CONFIG",
-				EnvVar: "SERVER_JS_ENV_PREFIX",
+				Value:  "CONFIG_",
+				EnvVar: "JS_ENV_PREFIX",
 			},
 			&cli.StringFlag{
-				Name:   "js-env-window-key",
+				Name:   "js-env-key",
 				Usage:  "Which key to use when exposing the config to window",
 				Value:  "config",
-				EnvVar: "SERVER_JS_ENV_WINDOW_KEY",
+				EnvVar: "JS_ENV_WINDOW_KEY",
 			},
 			&cli.StringFlag{
 				Name:   "js-env-route",
 				Usage:  "Where window.config js is exposed",
 				Value:  "/__/config.js",
-				EnvVar: "SERVER_JS_ENV_ROUTE",
+				EnvVar: "JS_ENV_ROUTE",
+			},
+			&cli.BoolFlag{
+				Name:   "no-cache",
+				Usage:  "No cache headers",
+				EnvVar: "NO_CACHE",
+			},
+			&cli.BoolFlag{
+				Name:   "compress",
+				Usage:  "Allow response gzip compression",
+				EnvVar: "COMPRESS",
+			},
+			&cli.BoolFlag{
+				Name:   "cors",
+				Usage:  "Set CORS Origin, Method and Headers to be *",
+				EnvVar: "CORS",
 			},
 			&cli.StringFlag{
 				Name:   "dir",
 				Usage:  "Static files directory",
 				Value:  ":80",
-				EnvVar: "SERVER_DIR",
+				EnvVar: "DIR",
 			},
 			&cli.StringFlag{
 				Name:   "address",
 				Usage:  "Server address",
 				Value:  ":80",
-				EnvVar: "SERVER_ADDRESS",
+				EnvVar: "ADDRESS",
 			},
 			&cli.StringFlag{
 				Name:   "base-url",
 				Usage:  ".",
-				EnvVar: "SERVER_BASE_URL",
+				EnvVar: "BASE_URL",
 			},
 		},
 		Action: serve,
@@ -64,7 +81,8 @@ func main() {
 func serve(c *cli.Context) error {
 	fs := http.FileServer(http.Dir(c.String("dir")))
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	var h http.Handler
+	h = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hasTrailing := r.URL.Path[len(r.URL.Path)-1:] == "/"
 		if !strings.Contains(r.URL.Path, "htm") && !hasTrailing {
 			fs.ServeHTTP(w, r)
@@ -95,7 +113,30 @@ func serve(c *cli.Context) error {
 		}
 	})
 
-	http.Handle(c.String("js-env-route"), js.Serve(c.String("js-env-prefix"), c.String("js-env-window-key")))
+	if c.Bool("compress") {
+		logrus.Info("Compression enabled")
+		h = gziphandler.GzipHandler(h)
+	}
+
+	if c.Bool("no-cache") {
+		logrus.Info("No-cache headers enabled")
+		h = middlewares.NoCache(h)
+	}
+
+	if c.Bool("cors") {
+		logrus.Info("CORS headers enabled")
+		h = middlewares.Cors(h)
+	}
+
+	http.Handle("/", h)
+
+	logrus.Infof(
+		"Loading js script at %s, using env variables with prefix %s and exposing as window.%s",
+		c.String("js-env-route"),
+		c.String("js-env-prefix"),
+		c.String("js-env-key"),
+	)
+	http.Handle(c.String("js-env-route"), js.Serve(c.String("js-env-prefix"), c.String("js-env-key")))
 
 	return http.ListenAndServe(c.String("address"), nil)
 }
