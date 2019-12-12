@@ -18,6 +18,22 @@ func main() {
 		Usage: "PWA static file server",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
+				Name:   "dir",
+				Usage:  "Static files directory",
+				EnvVar: "DIR",
+			},
+			&cli.StringFlag{
+				Name:   "address",
+				Usage:  "Server address",
+				Value:  ":80",
+				EnvVar: "ADDRESS",
+			},
+			&cli.StringFlag{
+				Name:   "base-url",
+				Usage:  "If set, adds <base href=value> on HTML heads",
+				EnvVar: "BASE_URL",
+			},
+			&cli.StringFlag{
 				Name:   "env-js-prefix",
 				Usage:  "Dynamic JS env variables prefix",
 				Value:  "CONFIG_",
@@ -35,14 +51,14 @@ func main() {
 				EnvVar: "ENV_JS_ROUTE",
 			},
 			&cli.BoolFlag{
-				Name:   "no-cache",
-				Usage:  "Add no-cache headers",
-				EnvVar: "NO_CACHE",
+				Name:   "allow-cache",
+				Usage:  "Disable no-cache headers",
+				EnvVar: "ALLOW_CACHE",
 			},
 			&cli.BoolFlag{
 				Name:   "no-compression",
 				Usage:  "Enable gzip compression",
-				EnvVar: "COMPRESSION",
+				EnvVar: "NO_COMPRESSION",
 			},
 			&cli.BoolFlag{
 				Name:   "cors",
@@ -53,22 +69,6 @@ func main() {
 				Name:   "no-helmet",
 				Usage:  "Disable security headers (helmet)",
 				EnvVar: "NO_HELMET",
-			},
-			&cli.StringFlag{
-				Name:   "dir",
-				Usage:  "Static files directory",
-				EnvVar: "DIR",
-			},
-			&cli.StringFlag{
-				Name:   "address",
-				Usage:  "Server address",
-				Value:  ":80",
-				EnvVar: "ADDRESS",
-			},
-			&cli.StringFlag{
-				Name:   "base-url",
-				Usage:  "If set, adds <base href=value> on HTML heads",
-				EnvVar: "BASE_URL",
 			},
 		},
 		Action: serve,
@@ -98,7 +98,7 @@ func serve(c *cli.Context) error {
 		h = gziphandler.GzipHandler(h)
 	}
 
-	if c.Bool("no-cache") {
+	if !c.Bool("allow-cache") {
 		logrus.Info("No-cache headers enabled")
 		h = middleware.NoCache(h)
 	}
