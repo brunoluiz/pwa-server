@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/sirupsen/logrus"
 )
 
 func RenderGlobalsFromEnv(prefix string, key string) string {
@@ -16,7 +14,6 @@ func RenderGlobalsFromEnv(prefix string, key string) string {
 		key := pair[0]
 		value := pair[1]
 
-		logrus.Info(key, prefix)
 		if !strings.HasPrefix(key, prefix) {
 			continue
 		}

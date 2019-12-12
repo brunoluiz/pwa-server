@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	"fmt"
@@ -8,15 +8,15 @@ import (
 type BasicAuthMiddleware struct {
 	realm       string
 	credentials map[string][]string
-	handler     http.Handler
+	next        http.Handler
 }
 
 func BasicAuth(
 	realm string,
 	credentials map[string][]string,
-	handler http.Handler,
+	next http.Handler,
 ) *BasicAuthMiddleware {
-	return &BasicAuthMiddleware{realm, credentials, handler}
+	return &BasicAuthMiddleware{realm, credentials, next}
 }
 
 func (h *BasicAuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +34,7 @@ func (h *BasicAuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	for _, validPassword := range validPasswords {
 		if password == validPassword {
-			h.handler.ServeHTTP(w, r)
+			h.next.ServeHTTP(w, r)
 			return
 		}
 	}

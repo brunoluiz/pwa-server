@@ -8,7 +8,7 @@ import (
 	"github.com/NYTimes/gziphandler"
 	"github.com/brunoluiz/go-pwa-server/htmlmod"
 	"github.com/brunoluiz/go-pwa-server/js"
-	"github.com/brunoluiz/go-pwa-server/middlewares"
+	"github.com/brunoluiz/go-pwa-server/middleware"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
@@ -40,7 +40,7 @@ func main() {
 				EnvVar: "NO_CACHE",
 			},
 			&cli.BoolFlag{
-				Name:   "compression",
+				Name:   "no-compression",
 				Usage:  "Enable gzip compression",
 				EnvVar: "COMPRESSION",
 			},
@@ -48,6 +48,11 @@ func main() {
 				Name:   "cors",
 				Usage:  "Add CORS Origin, Method and Headers as *",
 				EnvVar: "CORS",
+			},
+			&cli.BoolFlag{
+				Name:   "no-helmet",
+				Usage:  "Disable security headers (helmet)",
+				EnvVar: "NO_HELMET",
 			},
 			&cli.StringFlag{
 				Name:   "dir",
@@ -88,19 +93,24 @@ func serve(c *cli.Context) error {
 		h = http.FileServer(http.Dir(c.String("dir")))
 	}
 
-	if c.Bool("compression") {
+	if !c.Bool("no-compression") {
 		logrus.Info("Compression enabled")
 		h = gziphandler.GzipHandler(h)
 	}
 
 	if c.Bool("no-cache") {
 		logrus.Info("No-cache headers enabled")
-		h = middlewares.NoCache(h)
+		h = middleware.NoCache(h)
 	}
 
 	if c.Bool("cors") {
 		logrus.Info("CORS headers enabled")
-		h = middlewares.Cors(h)
+		h = middleware.Cors(h)
+	}
+
+	if !c.Bool("no-helmet") {
+		logrus.Info("Helmet enabled")
+		h = middleware.Helmet(h)
 	}
 
 	http.Handle("/", h)
@@ -113,10 +123,11 @@ func serve(c *cli.Context) error {
 			c.String("env-js-key"),
 		)
 
-		http.Handle(
-			c.String("env-js-route"),
-			js.Handler(c.String("env-js-prefix"), c.String("env-js-key")),
-		)
+		var jsHandler http.Handler
+		jsHandler = js.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
+		jsHandler = middleware.Helmet(jsHandler)
+
+		http.Handle(c.String("env-js-route"), jsHandler)
 	}
 
 	return http.ListenAndServe(c.String("address"), nil)
