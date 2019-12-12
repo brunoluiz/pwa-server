@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 	"os"
 
@@ -17,22 +18,21 @@ func main() {
 		Usage: "PWA static file server",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:   "js-env-prefix",
+				Name:   "env-js-prefix",
 				Usage:  "Dynamic JS env variables prefix",
 				Value:  "CONFIG_",
-				EnvVar: "JS_ENV_PREFIX",
+				EnvVar: "ENV_JS_PREFIX",
 			},
 			&cli.StringFlag{
-				Name:   "js-env-key",
+				Name:   "env-js-key",
 				Usage:  "Which key to use when exposing the config to window",
 				Value:  "config",
-				EnvVar: "JS_ENV_WINDOW_KEY",
+				EnvVar: "ENV_JS_WINDOW_KEY",
 			},
 			&cli.StringFlag{
-				Name:   "js-env-route",
+				Name:   "env-js-route",
 				Usage:  "JS config route",
-				Value:  "/__/config.js",
-				EnvVar: "JS_ENV_ROUTE",
+				EnvVar: "ENV_JS_ROUTE",
 			},
 			&cli.BoolFlag{
 				Name:   "no-cache",
@@ -52,7 +52,6 @@ func main() {
 			&cli.StringFlag{
 				Name:   "dir",
 				Usage:  "Static files directory",
-				Value:  ":80",
 				EnvVar: "DIR",
 			},
 			&cli.StringFlag{
@@ -63,7 +62,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:   "base-url",
-				Usage:  ".",
+				Usage:  "If set, adds <base href=value> on HTML heads",
 				EnvVar: "BASE_URL",
 			},
 		},
@@ -77,7 +76,17 @@ func main() {
 }
 
 func serve(c *cli.Context) error {
-	h := htmlmod.Serve(c.String("dir"), c.String("base-url"))
+	if c.String("dir") == "" {
+		return errors.New("No static file directory set")
+	}
+
+	var h http.Handler
+	if c.String("base-url") != "" {
+		logrus.Info("HTML dynamic modification enabled")
+		h = htmlmod.Serve(c.String("dir"), c.String("base-url"))
+	} else {
+		h = http.FileServer(http.Dir(c.String("dir")))
+	}
 
 	if c.Bool("compression") {
 		logrus.Info("Compression enabled")
@@ -96,13 +105,19 @@ func serve(c *cli.Context) error {
 
 	http.Handle("/", h)
 
-	logrus.Infof(
-		"Loading js script at %s, using env variables with prefix %s and exposing as window.%s",
-		c.String("js-env-route"),
-		c.String("js-env-prefix"),
-		c.String("js-env-key"),
-	)
-	http.Handle(c.String("js-env-route"), js.Serve(c.String("js-env-prefix"), c.String("js-env-key")))
+	if c.String("env-js-route") != "" {
+		logrus.Infof(
+			"Env to JS route registered at %s (env %s, window.%s)",
+			c.String("env-js-route"),
+			c.String("env-js-prefix"),
+			c.String("env-js-key"),
+		)
+
+		http.Handle(
+			c.String("env-js-route"),
+			js.Handler(c.String("env-js-prefix"), c.String("env-js-key")),
+		)
+	}
 
 	return http.ListenAndServe(c.String("address"), nil)
 }
