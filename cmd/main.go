@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/NYTimes/gziphandler"
+	"github.com/brunoluiz/go-pwa-server/envjs"
 	"github.com/brunoluiz/go-pwa-server/htmlmod"
-	"github.com/brunoluiz/go-pwa-server/js"
 	"github.com/brunoluiz/go-pwa-server/middleware"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -82,7 +82,7 @@ func main() {
 
 func serve(c *cli.Context) error {
 	if c.String("dir") == "" {
-		return errors.New("No static file directory set")
+		return errors.New("no static file directory set")
 	}
 
 	var h http.Handler
@@ -123,11 +123,10 @@ func serve(c *cli.Context) error {
 			c.String("env-js-key"),
 		)
 
-		var jsHandler http.Handler
-		jsHandler = js.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
-		jsHandler = middleware.Helmet(jsHandler)
-
-		http.Handle(c.String("env-js-route"), jsHandler)
+		var js http.Handler
+		js = envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
+		js = middleware.Helmet(js)
+		http.Handle(c.String("env-js-route"), js)
 	}
 
 	return http.ListenAndServe(c.String("address"), nil)
