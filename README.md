@@ -36,3 +36,10 @@ Example: `go-pwa-server --env-js-prefix CONFIG_ --env-js-key app --env-js-route 
 - Loads all env variables prefixed as `CONFIG_`
 - Exposes as `window.app={CONFIG_...="some-value"}`
 - At `http://0.0.0.0/config.js`
+
+## To-do
+
+- Allow extension
+- Docker image
+- Auto-publishing
+- Tests
