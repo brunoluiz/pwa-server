@@ -21,9 +21,9 @@ Run `go-pwa-server --dir ./your/static/dir` with the following options (all can 
 
 ## Features
 
-- Adds security headers (quite like helmet) *by default*
-- Enable compression *by default*
-- Disable cache *by default*
+- Adds security headers (helmet) **by default**
+- Enable compression **by default**
+- Disable cache **by default**
 - Supports adding a base url as `<base href={base-url} />` in `<head>`, if specified
 - Support allowing CORS *
 - Supports exposing env variables with a configured prefix in a specific route
