@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// BasicAuth adds a middleare for basic auth
 func BasicAuth(
 	realm string,
 	credentials map[string][]string,

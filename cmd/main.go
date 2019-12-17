@@ -87,6 +87,7 @@ func serve(c *cli.Context) error {
 
 	mux := http.NewServeMux()
 
+	// Create interceptors
 	interceptors := []handler.InterceptorConfig{
 		{"HTML Dynamic", middleware.HTMLBaseURL(dir, c.String("base-url")), c.String("base-url") == ""},
 		{"Compression", gziphandler.GzipHandler, c.Bool("no-compression")},
@@ -94,8 +95,11 @@ func serve(c *cli.Context) error {
 		{"CORS", middleware.Cors, c.Bool("cors")},
 		{"Helmet", middleware.Helmet, c.Bool("no-helmet")},
 	}
+
+	// Serve static files
 	mux.Handle("/", handler.Static(dir, interceptors...))
 
+	// Create JS config route
 	if c.String("env-js-route") != "" {
 		logrus.Infof(
 			"JS config at %s (env %s, window.%s)",
@@ -103,9 +107,18 @@ func serve(c *cli.Context) error {
 		)
 
 		js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
-		js = middleware.Helmet(js)
-		mux.Handle(c.String("env-js-route"), js)
+		mux.Handle(c.String("env-js-route"), handler.ApplyInterceptors(js, interceptors...))
 	}
 
+	// Log enabled interceptors
+	for _, interceptor := range interceptors {
+		if interceptor.Disable {
+			continue
+		}
+
+		logrus.Infof("%s enabled", interceptor.Name)
+	}
+
+	// Serve
 	return http.ListenAndServe(c.String("address"), mux)
 }

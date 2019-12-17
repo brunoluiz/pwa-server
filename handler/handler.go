@@ -2,10 +2,9 @@ package handler
 
 import (
 	"net/http"
-
-	"github.com/sirupsen/logrus"
 )
 
+// InterceptorConfig configs for interceptor
 type InterceptorConfig struct {
 	Name    string
 	Handler func(http.Handler) http.Handler
@@ -18,7 +17,6 @@ func ApplyInterceptors(h http.Handler, interceptors ...InterceptorConfig) http.H
 			continue
 		}
 
-		logrus.Infof("%s enabled", interceptor.Name)
 		h = interceptor.Handler(h)
 	}
 

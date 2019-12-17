@@ -6,6 +6,7 @@ import (
 	"github.com/unrolled/secure"
 )
 
+// Helmet add some security defaults for any request
 func Helmet(next http.Handler) http.Handler {
 	helmet := secure.New(secure.Options{
 		STSSeconds:            31536000,

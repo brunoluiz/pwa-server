@@ -9,6 +9,7 @@ import (
 	"golang.org/x/net/html"
 )
 
+// HTMLBaseURL add <base href='baseUrl'> tag to html->head, with the specified base url
 func HTMLBaseURL(dir string, baseURL string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
