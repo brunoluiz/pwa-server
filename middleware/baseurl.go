@@ -1,20 +1,19 @@
-package htmlmod
+package middleware
 
 import (
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/brunoluiz/go-pwa-server/htmlmod"
 	"golang.org/x/net/html"
 )
 
-func Serve(dir string, baseUrl string) http.Handler {
-	fs := http.FileServer(http.Dir(dir))
-
+func HTMLBaseURL(dir string, baseURL string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hasTrailing := r.URL.Path[len(r.URL.Path)-1:] == "/"
 		if !strings.Contains(r.URL.Path, "htm") && !hasTrailing {
-			fs.ServeHTTP(w, r)
+			next.ServeHTTP(w, r)
 			return
 		}
 
@@ -34,7 +33,7 @@ func Serve(dir string, baseUrl string) http.Handler {
 			panic("Fail to parse")
 		}
 
-		EnhanceHTML(doc, &PWASettings{BaseURL: baseUrl})
+		htmlmod.EnhanceHTML(doc, &htmlmod.Settings{BaseURL: baseURL})
 		if err := html.Render(w, doc); err != nil {
 			panic(err)
 		}

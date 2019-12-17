@@ -2,11 +2,11 @@ package htmlmod
 
 import "golang.org/x/net/html"
 
-type PWASettings struct {
+type Settings struct {
 	BaseURL string
 }
 
-func EnhanceHTML(n *html.Node, pwa *PWASettings) bool {
+func EnhanceHTML(n *html.Node, pwa *Settings) bool {
 	if n.Type == html.ElementNode && n.Data == "head" {
 		n.InsertBefore(&html.Node{
 			Type: html.ElementNode,

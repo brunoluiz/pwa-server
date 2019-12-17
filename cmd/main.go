@@ -85,12 +85,11 @@ func serve(c *cli.Context) error {
 		return errors.New("no static file directory set")
 	}
 
-	var h http.Handler
+	h := http.FileServer(http.Dir(c.String("dir")))
+
 	if c.String("base-url") != "" {
 		logrus.Info("HTML dynamic modification enabled")
 		h = htmlmod.Serve(c.String("dir"), c.String("base-url"))
-	} else {
-		h = http.FileServer(http.Dir(c.String("dir")))
 	}
 
 	if !c.Bool("no-compression") {
