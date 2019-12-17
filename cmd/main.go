@@ -70,6 +70,17 @@ func main() {
 				Usage:  "Disable security headers (helmet)",
 				EnvVar: "NO_HELMET",
 			},
+			&cli.BoolFlag{
+				Name:   "request-logger",
+				Usage:  "Enable request logger",
+				EnvVar: "REQUEST_LOGGER",
+			},
+			&cli.StringFlag{
+				Name:   "request-logger-format",
+				Usage:  "Request logger format (apache)",
+				EnvVar: "REQUEST_LOGGER_FORMAT",
+				Value:  middleware.LogFormatCommon,
+			},
 		},
 		Action: serve,
 	}
@@ -87,17 +98,8 @@ func serve(c *cli.Context) error {
 
 	mux := http.NewServeMux()
 
-	// Create interceptors
-	interceptors := []handler.InterceptorConfig{
-		{"HTML Dynamic", middleware.HTMLBaseURL(dir, c.String("base-url")), c.String("base-url") == ""},
-		{"Compression", gziphandler.GzipHandler, c.Bool("no-compression")},
-		{"No-cache", middleware.NoCache, c.Bool("allow-cache")},
-		{"CORS", middleware.Cors, c.Bool("cors")},
-		{"Helmet", middleware.Helmet, c.Bool("no-helmet")},
-	}
-
 	// Serve static files
-	mux.Handle("/", handler.Static(dir, interceptors...))
+	mux.Handle("/", handler.Static(dir))
 
 	// Create JS config route
 	if c.String("env-js-route") != "" {
@@ -107,18 +109,22 @@ func serve(c *cli.Context) error {
 		)
 
 		js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
-		mux.Handle(c.String("env-js-route"), handler.ApplyInterceptors(js, interceptors...))
+		mux.Handle(c.String("env-js-route"), js)
 	}
 
-	// Log enabled interceptors
-	for _, interceptor := range interceptors {
-		if interceptor.Disable {
-			continue
-		}
-
-		logrus.Infof("%s enabled", interceptor.Name)
+	// Create interceptors
+	interceptors := []handler.InterceptorConfig{
+		{"HTML Dynamic", middleware.HTMLBaseURL(dir, c.String("base-url")), c.String("base-url") == ""},
+		{"Compression", gziphandler.GzipHandler, c.Bool("no-compression")},
+		{"No-cache", middleware.NoCache, c.Bool("allow-cache")},
+		{"CORS", middleware.Cors, !c.Bool("cors")},
+		{"Helmet", middleware.Helmet, c.Bool("no-helmet")},
+		{"Log", middleware.Logger(c.String("request-logger-format")), !c.Bool("request-logger")},
 	}
 
 	// Serve
-	return http.ListenAndServe(c.String("address"), mux)
+	return http.ListenAndServe(
+		c.String("address"),
+		handler.ApplyInterceptors(mux, interceptors...),
+	)
 }
