@@ -7,7 +7,7 @@ import (
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/brunoluiz/go-pwa-server/envjs"
-	"github.com/brunoluiz/go-pwa-server/htmlmod"
+	"github.com/brunoluiz/go-pwa-server/handler"
 	"github.com/brunoluiz/go-pwa-server/middleware"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -74,59 +74,38 @@ func main() {
 		Action: serve,
 	}
 
-	err := app.Run(os.Args)
-	if err != nil {
+	if err := app.Run(os.Args); err != nil {
 		logrus.Fatal(err)
 	}
 }
 
 func serve(c *cli.Context) error {
-	if c.String("dir") == "" {
+	dir := c.String("dir")
+	if dir == "" {
 		return errors.New("no static file directory set")
 	}
 
-	h := http.FileServer(http.Dir(c.String("dir")))
+	mux := http.NewServeMux()
 
-	if c.String("base-url") != "" {
-		logrus.Info("HTML dynamic modification enabled")
-		h = htmlmod.Serve(c.String("dir"), c.String("base-url"))
+	interceptors := []handler.InterceptorConfig{
+		{"HTML Dynamic", middleware.HTMLBaseURL(dir, c.String("base-url")), c.String("base-url") == ""},
+		{"Compression", gziphandler.GzipHandler, c.Bool("no-compression")},
+		{"No-cache", middleware.NoCache, c.Bool("allow-cache")},
+		{"CORS", middleware.Cors, c.Bool("cors")},
+		{"Helmet", middleware.Helmet, c.Bool("no-helmet")},
 	}
-
-	if !c.Bool("no-compression") {
-		logrus.Info("Compression enabled")
-		h = gziphandler.GzipHandler(h)
-	}
-
-	if !c.Bool("allow-cache") {
-		logrus.Info("No-cache headers enabled")
-		h = middleware.NoCache(h)
-	}
-
-	if c.Bool("cors") {
-		logrus.Info("CORS headers enabled")
-		h = middleware.Cors(h)
-	}
-
-	if !c.Bool("no-helmet") {
-		logrus.Info("Helmet enabled")
-		h = middleware.Helmet(h)
-	}
-
-	http.Handle("/", h)
+	mux.Handle("/", handler.Static(dir, interceptors...))
 
 	if c.String("env-js-route") != "" {
 		logrus.Infof(
-			"Env to JS route registered at %s (env %s, window.%s)",
-			c.String("env-js-route"),
-			c.String("env-js-prefix"),
-			c.String("env-js-key"),
+			"JS config at %s (env %s, window.%s)",
+			c.String("env-js-route"), c.String("env-js-prefix"), c.String("env-js-key"),
 		)
 
-		var js http.Handler
-		js = envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
+		js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
 		js = middleware.Helmet(js)
-		http.Handle(c.String("env-js-route"), js)
+		mux.Handle(c.String("env-js-route"), js)
 	}
 
-	return http.ListenAndServe(c.String("address"), nil)
+	return http.ListenAndServe(c.String("address"), mux)
 }

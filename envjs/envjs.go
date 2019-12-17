@@ -29,16 +29,9 @@ func EnvToJS(prefix string, key string) string {
 	return "window." + key + "={" + strings.Join(values, ",") + "}"
 }
 
-type EnvJS struct {
-	prefix string
-	key    string
-}
-
-func Handler(prefix string, key string) *EnvJS {
-	return &EnvJS{prefix, key}
-}
-
-func (h *EnvJS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/javascript")
-	fmt.Fprint(w, EnvToJS(h.prefix, h.key))
+func Handler(prefix string, key string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
+		fmt.Fprint(w, EnvToJS(prefix, key))
+	})
 }
