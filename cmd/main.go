@@ -71,14 +71,14 @@ func main() {
 				EnvVar: "NO_HELMET",
 			},
 			&cli.BoolFlag{
-				Name:   "request-logger",
+				Name:   "req-logger",
 				Usage:  "Enable request logger",
-				EnvVar: "REQUEST_LOGGER",
+				EnvVar: "REQ_LOGGER",
 			},
 			&cli.StringFlag{
-				Name:   "request-logger-format",
+				Name:   "req-logger-format",
 				Usage:  "Request logger format (apache)",
-				EnvVar: "REQUEST_LOGGER_FORMAT",
+				EnvVar: "REQ_LOGGER_FORMAT",
 				Value:  middleware.LogFormatCommon,
 			},
 		},
@@ -114,12 +114,12 @@ func serve(c *cli.Context) error {
 
 	// Create interceptors
 	interceptors := []handler.InterceptorConfig{
-		{"HTML Dynamic", middleware.HTMLBaseURL(dir, c.String("base-url")), c.String("base-url") == ""},
-		{"Compression", gziphandler.GzipHandler, c.Bool("no-compression")},
-		{"No-cache", middleware.NoCache, c.Bool("allow-cache")},
-		{"CORS", middleware.Cors, !c.Bool("cors")},
-		{"Helmet", middleware.Helmet, c.Bool("no-helmet")},
-		{"Log", middleware.Logger(c.String("request-logger-format")), !c.Bool("request-logger")},
+		{Wrapper: middleware.HTMLBaseURL(dir, c.String("base-url")), Disable: c.String("base-url") == ""},
+		{Wrapper: gziphandler.GzipHandler, Disable: c.Bool("no-compression")},
+		{Wrapper: middleware.NoCache, Disable: c.Bool("allow-cache")},
+		{Wrapper: middleware.Cors, Disable: !c.Bool("cors")},
+		{Wrapper: middleware.Helmet, Disable: c.Bool("no-helmet")},
+		{Wrapper: middleware.Logger(c.String("req-logger-format")), Disable: !c.Bool("req-logger")},
 	}
 
 	// Serve
