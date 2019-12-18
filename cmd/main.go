@@ -29,6 +29,12 @@ func main() {
 				EnvVar: "ADDRESS",
 			},
 			&cli.StringFlag{
+				Name:   "ready-route",
+				Usage:  "Ready probe route",
+				Value:  "/__/ready",
+				EnvVar: "READY_ROUTE",
+			},
+			&cli.StringFlag{
 				Name:   "base-url",
 				Usage:  "If set, adds <base href=value> on HTML heads",
 				EnvVar: "BASE_URL",
@@ -97,6 +103,9 @@ func serve(c *cli.Context) error {
 	}
 
 	mux := http.NewServeMux()
+
+	// Serve ready status
+	mux.Handle(c.String("ready-route"), handler.Ready())
 
 	// Serve static files
 	mux.Handle("/", handler.Static(dir))
