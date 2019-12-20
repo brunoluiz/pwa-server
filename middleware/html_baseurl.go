@@ -13,8 +13,9 @@ import (
 func HTMLBaseURL(dir string, baseURL string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			isHTML := strings.Contains(r.URL.Path, "htm")
 			hasTrailing := r.URL.Path[len(r.URL.Path)-1:] == "/"
-			if !strings.Contains(r.URL.Path, "htm") && !hasTrailing {
+			if !isHTML && !hasTrailing {
 				next.ServeHTTP(w, r)
 				return
 			}

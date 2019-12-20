@@ -39,6 +39,11 @@ func main() {
 				Usage:  "If set, adds <base href=value> on HTML heads",
 				EnvVar: "BASE_URL",
 			},
+			&cli.BoolFlag{
+				Name:   "no-manifest-base-url",
+				Usage:  "Disables base-url manipulations for manifest.json",
+				EnvVar: "NO_MANIFEST_BASE_URL",
+			},
 			&cli.StringFlag{
 				Name:   "env-js-prefix",
 				Usage:  "Dynamic JS env variables prefix",
@@ -124,6 +129,7 @@ func serve(c *cli.Context) error {
 	// Create interceptors
 	interceptors := []handler.InterceptorConfig{
 		{Wrapper: middleware.HTMLBaseURL(dir, c.String("base-url")), Disable: c.String("base-url") == ""},
+		{Wrapper: middleware.ManifestBaseURL(dir, c.String("base-url")), Disable: c.Bool("no-manifest-base-url")},
 		{Wrapper: gziphandler.GzipHandler, Disable: c.Bool("no-compression")},
 		{Wrapper: middleware.NoCache, Disable: c.Bool("allow-cache")},
 		{Wrapper: middleware.Cors, Disable: !c.Bool("cors")},

@@ -1,0 +1,9 @@
+{
+  "name": "Test app",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "foo": {
+    "x": "bar"
+  }
+}
