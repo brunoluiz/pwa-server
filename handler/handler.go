@@ -27,7 +27,7 @@ func ApplyInterceptors(h http.Handler, interceptors ...InterceptorConfig) http.H
 
 		name := runtime.FuncForPC(reflect.ValueOf(interceptor.Wrapper).Pointer()).Name()
 		h = interceptor.Wrapper(h)
-		logrus.Infof("%s enabled", name)
+		logrus.Infof("enabled: %s", name)
 	}
 
 	return h
