@@ -46,8 +46,16 @@ Example: `go-pwa-server --env-js-prefix CONFIG_ --env-js-key app --env-js-route 
 - Exposes as `window.app={CONFIG_...="some-value"}`
 - At `http://0.0.0.0/config.js`
 
+## Running using docker
+
+```
+docker run -p 80:80 \
+  --env-file .env.sample \
+  -v $(PWD)/test/static:/static \
+  brunoluiz/go-pwa-server
+```
+
 ## To-do
 
-- Docker image
 - Auto-publishing
 - Tests

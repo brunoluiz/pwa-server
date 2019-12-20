@@ -1,2 +1,4 @@
+*.md
+.env.sample
 bin
 .git

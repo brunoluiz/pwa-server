@@ -1,3 +1,4 @@
+DOCKER_REPO:=brunoluiz
 PROJECT_NAME:=go-pwa-server
 
 ## Prepare version tags
@@ -8,6 +9,9 @@ ifeq ($(GIT_BRANCH), master)
 	DOCKER_TAG := latest
 endif
 
+#
+# Golang tooling
+#
 .PHONY: test
 test:
 	go test -race ./...
@@ -15,20 +19,26 @@ test:
 build:
 	go build -o ./bin/go-pwa-server ./cmd
 
-# Docker build
+#
+# Docker tooling
+#
 docker-login:
-	@docker login --username $(DOCKER_HUB_LOGIN) --password=$(DOCKER_HUB_PASSWORD)
+	docker login --username $(DOCKER_HUB_USER) --password=$(DOCKER_HUB_PASSWORD)
 
 docker-build:
-	docker build -t $(PROJECT_NAME):local .
-	docker push go-pwa-server
+	docker build -t $(DOCKER_REPO)/$(PROJECT_NAME):local .
+
+docker-push:
+	docker push $(DOCKER_REPO)/$(PROJECT_NAME)
 
 docker-run:
 	docker run -p 80:80 \
 		--env-file .env.sample \
 		-v $(PWD)/test/static:/static \
-		$(PROJECT_NAME)
+		$(DOCKER_REPO)/$(PROJECT_NAME):local
 
-ci-docker-build: docker-login
-	docker build -t $(PROJECT_NAME):$(VERSION) -t $(PROJECT_NAME):$(DOCKER_TAG) $(PROJECT_NAME) .
+docker-publish: docker-login
+	docker build -t $(DOCKER_REPO)/$(PROJECT_NAME):$(VERSION) \
+		-t $(DOCKER_REPO)/$(PROJECT_NAME):$(DOCKER_TAG) \
+		$(PROJECT_NAME) .
 	docker push go-pwa-server
