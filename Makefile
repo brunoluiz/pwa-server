@@ -23,6 +23,12 @@ docker-build:
 	docker build -t $(PROJECT_NAME):local .
 	docker push go-pwa-server
 
+docker-run:
+	docker run -p 80:80 \
+		--env-file .env.sample \
+		-v $(PWD)/test/static:/static \
+		$(PROJECT_NAME)
+
 ci-docker-build: docker-login
 	docker build -t $(PROJECT_NAME):$(VERSION) -t $(PROJECT_NAME):$(DOCKER_TAG) $(PROJECT_NAME) .
 	docker push go-pwa-server
