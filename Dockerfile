@@ -1,10 +1,7 @@
 #
 # BUILD
 #
-FROM golang:1-alpine AS build
-
-## Add Maintainer Info
-LABEL maintainer="Bruno Luiz Silva <contact@brunoluiz.net>"
+FROM golang:1 AS build
 
 ## Set the Current Working Directory inside the container
 WORKDIR /app
@@ -18,16 +15,18 @@ RUN go mod download
 ## Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
+RUN make install-tools test lint
+
 ## Build the Go app
 RUN go build -o main ./cmd
-
-# Command to run the executable
-CMD ["./main"]
 
 #
 # RUNTIME
 #
 FROM alpine:3
+
+## Add Maintainer Info
+LABEL maintainer="Bruno Luiz Silva <contact@brunoluiz.net>"
 
 RUN apk --no-cache add ca-certificates
 

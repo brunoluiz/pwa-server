@@ -16,16 +16,16 @@ endif
 test:
 	go test -race ./...
 
+lint:
+	bin/golangci-lint run --deadline=2m ./...
+
 build:
 	go build -o ./bin/go-pwa-server ./cmd
 
 LINTER_VERSION ?= 1.21.0
-LINTER ?= bin/golangci-lint
-.PHONY: lint
-lint:
-	@if [ "`$(LINTER) --version | awk '{print $$4}'`" != $(LINTER_VERSION) ]; then \
-		curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v$(LINTER_VERSION); fi
-	$(LINTER) run --deadline=2m ./...
+install-tools:
+	@if [ "`bin/golangci-lint --version | awk '{print $$4}'`" != $(LINTER_VERSION) ]; then \
+		wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v$(LINTER_VERSION); fi
 
 #
 # Docker tooling
