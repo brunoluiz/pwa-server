@@ -3,17 +3,11 @@ package manifestmod
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 )
 
 // ChangeBaseURL changes manifest.json start_url and scope using baseURL
-func ChangeBaseURL(f io.Reader, baseURL string) ([]byte, error) {
+func ChangeBaseURL(buf []byte, baseURL string) ([]byte, error) {
 	manifest := make(map[string]interface{})
-	buf, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, fmt.Errorf("error on opening manifest.json: %s", err)
-	}
 
 	if err := json.Unmarshal(buf, &manifest); err != nil {
 		return nil, fmt.Errorf("error on unmarshaling manifest.json: %s", err)

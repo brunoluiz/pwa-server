@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -22,18 +23,23 @@ func ManifestBaseURL(
 
 			f, err := os.Open(dir + r.URL.Path)
 			if err != nil {
-				panic("Fail to open")
+				panic("Fail to open manifest.json")
 			}
 			defer f.Close()
 
-			js, err := manifestmod.ChangeBaseURL(f, baseURL)
+			buf, err := ioutil.ReadAll(f)
+			if err != nil {
+				panic("error on reading manifest.json")
+			}
+
+			js, err := manifestmod.ChangeBaseURL(buf, baseURL)
 			if err != nil {
 				panic(err)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
 			if _, err := w.Write(js); err != nil {
-				panic("error on sending data")
+				panic("error on sending manifest.json")
 			}
 		})
 	}
