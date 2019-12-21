@@ -1,0 +1,4 @@
+FROM scratch
+COPY go-pwa-server /
+ENV PORT 80
+ENTRYPOINT ["/go-pwa-server"]

@@ -28,6 +28,12 @@ install-tools:
 		wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v$(LINTER_VERSION); fi
 
 #
+# Publishing tooling
+#
+publish-test:
+	goreleaser --snapshot --skip-publish --rm-dist
+
+#
 # Docker tooling
 #
 docker-login:
