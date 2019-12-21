@@ -8,7 +8,9 @@ import (
 )
 
 const (
-	LogFormatCommon   string = `%h %l %u %t "%r" %>s %b`
+	// LogFormatCommon apache common log format
+	LogFormatCommon string = `%h %l %u %t "%r" %>s %b`
+	// LogFormatCombined apache combined log format
 	LogFormatCombined string = `%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"`
 )
 

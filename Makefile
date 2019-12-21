@@ -19,6 +19,14 @@ test:
 build:
 	go build -o ./bin/go-pwa-server ./cmd
 
+LINTER_VERSION ?= 1.21.0
+LINTER ?= bin/golangci-lint
+.PHONY: lint
+lint:
+	@if [ "`$(LINTER) --version | awk '{print $$4}'`" != $(LINTER_VERSION) ]; then \
+		curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v$(LINTER_VERSION); fi
+	$(LINTER) run --deadline=2m ./...
+
 #
 # Docker tooling
 #

@@ -14,13 +14,13 @@ func BasicAuth(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, password, headerFound := r.BasicAuth()
 		if !headerFound {
-			unauthorized(w, realm)
+			unauthorised(w, realm)
 			return
 		}
 
 		validPasswords, userFound := credentials[user]
 		if !userFound {
-			unauthorized(w, realm)
+			unauthorised(w, realm)
 			return
 		}
 
@@ -31,11 +31,11 @@ func BasicAuth(
 			}
 		}
 
-		unauthorized(w, realm)
+		unauthorised(w, realm)
 	})
 }
 
-func unauthorized(w http.ResponseWriter, realm string) {
+func unauthorised(w http.ResponseWriter, realm string) {
 	w.Header().Add("WWW-Authenticate", fmt.Sprintf(`Basic realm="%s"`, realm))
 	w.WriteHeader(http.StatusUnauthorized)
 }

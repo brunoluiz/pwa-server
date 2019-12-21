@@ -8,6 +8,7 @@ import (
 	"github.com/brunoluiz/go-pwa-server/manifestmod"
 )
 
+// ManifestBaseURL changes manifest.json start_url and scope using baseURL
 func ManifestBaseURL(
 	dir string,
 	baseURL string,

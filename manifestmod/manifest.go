@@ -31,7 +31,7 @@ func ChangeBaseURL(f io.Reader, baseURL string) ([]byte, error) {
 
 	js, err := json.Marshal(manifest)
 	if err != nil {
-		return nil, fmt.Errorf("error on marshaling manifest.json: %s", err)
+		return nil, fmt.Errorf("error on marshalling manifest.json: %s", err)
 	}
 
 	return js, nil
