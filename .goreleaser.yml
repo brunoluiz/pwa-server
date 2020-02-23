@@ -1,50 +1,27 @@
-project_name: go-pwa-server
-env:
-  - GO111MODULE=on
-
-before:
-  hooks:
-    - go mod tidy
+project_name: 'go-pwa-server'
 
 builds:
   - main: ./cmd/main.go
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-      - windows
-    goarch:
-      - 386
-      - amd64
-      - arm
-      - arm64
-    goarm:
-      - 6
-      - 7
-checksum:
-  name_template: '{{ .ProjectName }}_checksums.txt'
+    goos: ['linux', 'darwin', 'windows']
+    goarch: ['386', 'amd64', 'arm', 'arm64']
+    goarm: ['6', '7']
 
 changelog:
   sort: asc
   filters:
-    exclude:
-    - '^docs:'
-    - '^test:'
-    - Merge pull request
-    - Merge branch
+    exclude: ['^docs:', '^test:', 'Merge pull request', 'Merge branch']
+
+archives:
+  - format_overrides:
+    - goos: windows
+      format: zip
 
 nfpms:
   - homepage: https://github.com/brunoluiz/go-pwa-server
     description: 🚀 Fast static server for your PWA applications
-    maintainer: Bruno Luiz Silva <contact@brunoluiz.net>
-    license: MIT
-    vendor: GoReleaser
-    formats:
-    - deb
-    - rpm
-    dependencies:
-    - git
+    maintainer: Bruno Silva <contact@brunoluiz.net>
+    formats: ['deb', 'rpm']
+    dependencies: ['git']
 
 dockers:
   - image_templates:
@@ -55,18 +32,6 @@ dockers:
     binaries:
     - go-pwa-server
 
-archives:
-  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
-    format_overrides:
-    - goos: windows
-      format: zip
-
 brews:
   - github:
       owner: brunoluiz
@@ -74,6 +39,3 @@ brews:
     folder: Formula
     homepage: https://github.com/brunoluiz/go-pwa-server
     description: 🚀 Fast static server for your PWA applications
-
-snapshot:
-  name_template: "{{ .Tag }}-next"
