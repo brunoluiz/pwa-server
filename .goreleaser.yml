@@ -1,25 +1,25 @@
 project_name: 'go-pwa-server'
 
 builds:
-  - main: ./cmd/main.go
+  - main: './cmd/main.go'
     goos: ['linux', 'darwin', 'windows']
     goarch: ['386', 'amd64', 'arm', 'arm64']
     goarm: ['6', '7']
 
 changelog:
-  sort: asc
+  sort: 'asc'
   filters:
     exclude: ['^docs:', '^test:', 'Merge pull request', 'Merge branch']
 
 archives:
   - format_overrides:
-    - goos: windows
-      format: zip
+    - goos: 'windows'
+      format: 'zip'
 
 nfpms:
-  - homepage: https://github.com/brunoluiz/go-pwa-server
-    description: 🚀 Fast static server for your PWA applications
-    maintainer: Bruno Silva <contact@brunoluiz.net>
+  - homepage: 'https://github.com/brunoluiz/go-pwa-server'
+    description: '🚀 Fast static server for your PWA applications'
+    maintainer: 'Bruno Silva <contact@brunoluiz.net>'
     formats: ['deb', 'rpm']
     dependencies: ['git']
 
@@ -28,14 +28,14 @@ dockers:
     - 'brunoluiz/go-pwa-server:{{ .Tag }}'
     - 'brunoluiz/go-pwa-server:v{{ .Major }}.{{ .Minor }}'
     - 'brunoluiz/go-pwa-server:latest'
-    dockerfile: Dockerfile.prod
+    dockerfile: 'Dockerfile.prod'
     binaries:
-    - go-pwa-server
+    - 'go-pwa-server'
 
 brews:
   - github:
-      owner: brunoluiz
-      name: homebrew-tap
-    folder: Formula
-    homepage: https://github.com/brunoluiz/go-pwa-server
-    description: 🚀 Fast static server for your PWA applications
+      owner: 'brunoluiz'
+      name: 'homebrew-tap'
+    folder: 'Formula'
+    homepage: 'https://github.com/brunoluiz/go-pwa-server'
+    description: '🚀 Fast static server for your PWA applications'
