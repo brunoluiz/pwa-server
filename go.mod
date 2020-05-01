@@ -1,4 +1,4 @@
-module github.com/brunoluiz/go-pwa-server
+module github.com/brunoluiz/pwa-server
 
 go 1.13
 

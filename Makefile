@@ -1,5 +1,5 @@
 DOCKER_REPO:=brunoluiz
-PROJECT_NAME:=go-pwa-server
+PROJECT_NAME:=pwa-server
 
 ## Prepare version tags
 GIT_BRANCH?=$(shell git rev-parse --abbrev-ref HEAD)
@@ -20,7 +20,7 @@ lint:
 	bin/golangci-lint run --deadline=2m ./...
 
 build:
-	go build -o ./bin/go-pwa-server ./cmd
+	go build -o ./bin/pwa-server ./cmd
 
 LINTER_VERSION ?= 1.21.0
 install-tools:
@@ -55,4 +55,4 @@ docker-publish: docker-login
 	docker build -t $(DOCKER_REPO)/$(PROJECT_NAME):$(VERSION) \
 		-t $(DOCKER_REPO)/$(PROJECT_NAME):$(DOCKER_TAG) \
 		$(PROJECT_NAME) .
-	docker push go-pwa-server
+	docker push pwa-server

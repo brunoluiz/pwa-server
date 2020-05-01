@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/brunoluiz/go-pwa-server/htmlmod"
+	"github.com/brunoluiz/pwa-server/htmlmod"
 	"golang.org/x/net/html"
 )
 

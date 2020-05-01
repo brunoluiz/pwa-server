@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/NYTimes/gziphandler"
-	"github.com/brunoluiz/go-pwa-server/envjs"
-	"github.com/brunoluiz/go-pwa-server/handler"
-	"github.com/brunoluiz/go-pwa-server/middleware"
+	"github.com/brunoluiz/pwa-server/envjs"
+	"github.com/brunoluiz/pwa-server/handler"
+	"github.com/brunoluiz/pwa-server/middleware"
 	"github.com/go-chi/chi"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
