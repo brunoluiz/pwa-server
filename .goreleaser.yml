@@ -1,7 +1,7 @@
 project_name: 'go-pwa-server'
 
 builds:
-  - main: './cmd/main.go'
+  - main: './cmd/go-pwa-server/main.go'
     goos: ['linux', 'darwin', 'windows']
     goarch: ['386', 'amd64', 'arm', 'arm64']
     goarm: ['6', '7']
