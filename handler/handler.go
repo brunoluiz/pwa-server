@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"reflect"
 	"runtime"
 
@@ -52,16 +53,19 @@ func (w *NotFoundRedirectRespWr) Write(p []byte) (int, error) {
 	return len(p), nil // Lie that we successfully written it
 }
 
-func NotFoundHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		logrus.Infof("Redirecting %s to index.html.", r.RequestURI)
-		http.Redirect(w, r, "/index.html", http.StatusFound)
-	}
-}
-
 // Static Exposes static files through HTTP
 func Static(dir string, interceptors ...InterceptorConfig) http.Handler {
-	return ApplyInterceptors(http.FileServer(http.Dir(dir)), interceptors...)
+	root := http.Dir(dir)
+	fs := http.StripPrefix("/", http.FileServer(root))
+
+	return ApplyInterceptors(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, err := os.Stat(fmt.Sprintf("%s", root) + r.RequestURI); os.IsNotExist(err) {
+			http.ServeFile(w, r, dir+"/index.html")
+			return
+		}
+
+		fs.ServeHTTP(w, r)
+	}), interceptors...)
 }
 
 // Ready Disable CORS (add * headers)

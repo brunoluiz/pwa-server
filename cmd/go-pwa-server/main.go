@@ -68,6 +68,7 @@ func main() {
 				Name:   "env-js-route",
 				Usage:  "JS config route",
 				EnvVar: "ENV_JS_ROUTE",
+				Value:  "/__/config.js",
 			},
 			&cli.BoolFlag{
 				Name:   "allow-cache",
@@ -127,25 +128,23 @@ func serve(c *cli.Context) error {
 	// Start HTTP mux
 	mux := chi.NewRouter()
 	// mux.Use(chi_middleware.Recoverer)
-	mux.NotFound(handler.NotFoundHandler().ServeHTTP)
+	// mux.NotFound(handler.NotFoundHandler().ServeHTTP)
 
 	// Operational handlers
 	mux.Handle(c.String("ready-route"), handler.Ready())
 	mux.Handle(c.String("metrics-route"), promhttp.Handler())
 
 	// Serve static files
-	mux.Handle("/", handler.Static(dir))
+	mux.Get("/*", handler.Static(dir).ServeHTTP)
 
 	// Create JS config route
-	if c.String("env-js-route") != "" {
-		logrus.Infof(
-			"JS config at %s (env %s, window.%s)",
-			c.String("env-js-route"), c.String("env-js-prefix"), c.String("env-js-key"),
-		)
+	logrus.Infof(
+		"JS config at %s (env %s, window.%s)",
+		c.String("env-js-route"), c.String("env-js-prefix"), c.String("env-js-key"),
+	)
 
-		js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
-		mux.Handle(c.String("env-js-route"), js)
-	}
+	js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
+	mux.Handle(c.String("env-js-route"), js)
 
 	// Create interceptors
 	interceptors := []handler.InterceptorConfig{
