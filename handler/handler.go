@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"reflect"
 	"runtime"
 
@@ -34,8 +35,18 @@ func ApplyInterceptors(h http.Handler, interceptors ...InterceptorConfig) http.H
 }
 
 // Static Exposes static files through HTTP
-func Static(dir string, interceptors ...InterceptorConfig) http.Handler {
-	return ApplyInterceptors(http.FileServer(http.Dir(dir)), interceptors...)
+func Static(dir, notFoundFallbackFile string, interceptors ...InterceptorConfig) http.Handler {
+	root := http.Dir(dir)
+	fs := http.StripPrefix("/", http.FileServer(root))
+
+	return ApplyInterceptors(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, err := os.Stat(fmt.Sprintf("%s", root) + r.RequestURI); os.IsNotExist(err) {
+			http.ServeFile(w, r, dir+"/"+notFoundFallbackFile)
+			return
+		}
+
+		fs.ServeHTTP(w, r)
+	}), interceptors...)
 }
 
 // Ready Disable CORS (add * headers)

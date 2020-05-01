@@ -9,6 +9,7 @@ import (
 	"github.com/brunoluiz/go-pwa-server/envjs"
 	"github.com/brunoluiz/go-pwa-server/handler"
 	"github.com/brunoluiz/go-pwa-server/middleware"
+	"github.com/go-chi/chi"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -42,14 +43,10 @@ func main() {
 				EnvVar: "METRICS_ROUTE",
 			},
 			&cli.StringFlag{
-				Name:   "base-url",
-				Usage:  "If set, adds <base href=value> on HTML heads",
-				EnvVar: "BASE_URL",
-			},
-			&cli.BoolFlag{
-				Name:   "no-manifest-base-url",
-				Usage:  "Disables base-url manipulations for manifest.json",
-				EnvVar: "NO_MANIFEST_BASE_URL",
+				Name:   "env-js-route",
+				Usage:  "JS config route",
+				EnvVar: "ENV_JS_ROUTE",
+				Value:  "/__/config.js",
 			},
 			&cli.StringFlag{
 				Name:   "env-js-prefix",
@@ -64,9 +61,14 @@ func main() {
 				EnvVar: "ENV_JS_WINDOW_KEY",
 			},
 			&cli.StringFlag{
-				Name:   "env-js-route",
-				Usage:  "JS config route",
-				EnvVar: "ENV_JS_ROUTE",
+				Name:   "base-url",
+				Usage:  "If set, adds <base href=value> on HTML heads",
+				EnvVar: "BASE_URL",
+			},
+			&cli.BoolFlag{
+				Name:   "no-manifest-base-url",
+				Usage:  "Disables base-url manipulations for manifest.json",
+				EnvVar: "NO_MANIFEST_BASE_URL",
 			},
 			&cli.BoolFlag{
 				Name:   "allow-cache",
@@ -77,6 +79,12 @@ func main() {
 				Name:   "no-compression",
 				Usage:  "Enable gzip compression",
 				EnvVar: "NO_COMPRESSION",
+			},
+			&cli.StringFlag{
+				Name:   "not-found-file",
+				Usage:  "Redirect request to specific file if nothing was found on the route (index.html enables HTML Push State)",
+				EnvVar: "NOT_FOUND_FILE",
+				Value:  "index.html",
 			},
 			&cli.BoolFlag{
 				Name:   "cors",
@@ -124,25 +132,23 @@ func serve(c *cli.Context) error {
 	}
 
 	// Start HTTP mux
-	mux := http.NewServeMux()
+	mux := chi.NewRouter()
 
 	// Operational handlers
 	mux.Handle(c.String("ready-route"), handler.Ready())
 	mux.Handle(c.String("metrics-route"), promhttp.Handler())
 
 	// Serve static files
-	mux.Handle("/", handler.Static(dir))
+	mux.Handle("/*", handler.Static(dir, c.String("not-found-file")))
 
 	// Create JS config route
-	if c.String("env-js-route") != "" {
-		logrus.Infof(
-			"JS config at %s (env %s, window.%s)",
-			c.String("env-js-route"), c.String("env-js-prefix"), c.String("env-js-key"),
-		)
+	logrus.Infof(
+		"JS config at %s (env %s, window.%s)",
+		c.String("env-js-route"), c.String("env-js-prefix"), c.String("env-js-key"),
+	)
 
-		js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
-		mux.Handle(c.String("env-js-route"), js)
-	}
+	js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
+	mux.Handle(c.String("env-js-route"), js)
 
 	// Create interceptors
 	interceptors := []handler.InterceptorConfig{
