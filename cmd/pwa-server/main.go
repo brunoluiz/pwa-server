@@ -147,7 +147,7 @@ func serve(c *cli.Context) error {
 		c.String("env-js-route"), c.String("env-js-prefix"), c.String("env-js-window-key"),
 	)
 
-	js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
+	js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-window-key"))
 	mux.Handle(c.String("env-js-route"), js)
 
 	// Create interceptors
