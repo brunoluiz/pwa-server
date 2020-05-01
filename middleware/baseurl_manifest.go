@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/brunoluiz/go-pwa-server/manifestmod"
+	"github.com/brunoluiz/pwa-server/manifestmod"
 )
 
 // ManifestBaseURL changes manifest.json start_url and scope using baseURL

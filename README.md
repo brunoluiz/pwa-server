@@ -1,4 +1,4 @@
-# go-pwa-server
+# pwa-server
 
 🚀 Fast static server for your PWA applications
 
@@ -22,31 +22,31 @@ Use `brew` to install it
 
 ```
 brew tap brunoluiz/tap
-brew install go-pwa-server
+brew install pwa-server
 ```
 
 ### Linux and Windows
 
-[Check the releases section](https://github.com/brunoluiz/go-pwa-server/releases) for more information details 
+[Check the releases section](https://github.com/brunoluiz/pwa-server/releases) for more information details 
 
 ### go get
 
-Please avoid using `go get`. [Check our releases](https://github.com/brunoluiz/go-pwa-server/releases) for more details.
+Please avoid using `go get`. [Check our releases](https://github.com/brunoluiz/pwa-server/releases) for more details.
 
 ### Docker
 
-The tool is available as a Docker image as well. Please refer to [Docker Hub page](https://hub.docker.com/r/brunoluiz/go-pwa-server/tags) to pick a release
+The tool is available as a Docker image as well. Please refer to [Docker Hub page](https://hub.docker.com/r/brunoluiz/pwa-server/tags) to pick a release
 
 ```
 docker run -p 80:80 \
   --env-file .env.sample \
   -v $(PWD)/test/static:/static \
-  brunoluiz/go-pwa-server
+  brunoluiz/pwa-server
 ```
 
 ## Usage
 
-Run `go-pwa-server --dir ./your/static/dir` with the following options (all can be set as ENV variables as well)
+Run `pwa-server --dir ./your/static/dir` with the following options (all can be set as ENV variables as well)
 
 ```
    --dir value                Static files directory [$DIR]
@@ -74,7 +74,7 @@ Run `go-pwa-server --dir ./your/static/dir` with the following options (all can 
 
 Exposes enviroment variables in a specific route.
 
-Example: `go-pwa-server --env-js-prefix CONFIG_ --env-js-key app --env-js-route /config.js` loads:
+Example: `pwa-server --env-js-prefix CONFIG_ --env-js-key app --env-js-route /config.js` loads:
 - Loads all env variables prefixed as `CONFIG_`
 - Exposes as `window.app={CONFIG_...="some-value"}`
 - At `http://0.0.0.0/config.js`
