@@ -144,7 +144,7 @@ func serve(c *cli.Context) error {
 	// Create JS config route
 	logrus.Infof(
 		"JS config at %s (env %s, window.%s)",
-		c.String("env-js-route"), c.String("env-js-prefix"), c.String("env-js-key"),
+		c.String("env-js-route"), c.String("env-js-prefix"), c.String("env-js-window-key"),
 	)
 
 	js := envjs.Handler(c.String("env-js-prefix"), c.String("env-js-key"))
