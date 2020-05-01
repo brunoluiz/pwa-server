@@ -9,6 +9,7 @@ require (
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
 	github.com/lestrrat-go/apache-logformat v2.0.4+incompatible
 	github.com/lestrrat-go/strftime v1.0.0 // indirect
+	github.com/prometheus/client_golang v1.6.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/tebeka/strftime v0.1.3 // indirect
 	github.com/unrolled/secure v1.0.7

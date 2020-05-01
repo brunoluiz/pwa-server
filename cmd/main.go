@@ -9,6 +9,7 @@ import (
 	"github.com/brunoluiz/go-pwa-server/envjs"
 	"github.com/brunoluiz/go-pwa-server/handler"
 	"github.com/brunoluiz/go-pwa-server/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
@@ -33,6 +34,12 @@ func main() {
 				Usage:  "Ready probe route",
 				Value:  "/__/ready",
 				EnvVar: "READY_ROUTE",
+			},
+			&cli.StringFlag{
+				Name:   "metrics-route",
+				Usage:  "Metrics route",
+				Value:  "/__/metrics",
+				EnvVar: "METRICS_ROUTE",
 			},
 			&cli.StringFlag{
 				Name:   "base-url",
@@ -107,10 +114,12 @@ func serve(c *cli.Context) error {
 		return errors.New("no static file directory set")
 	}
 
+	// Start HTTP mux
 	mux := http.NewServeMux()
 
-	// Serve ready status
+	// Operational handlers
 	mux.Handle(c.String("ready-route"), handler.Ready())
+	mux.Handle(c.String("metrics-route"), promhttp.Handler())
 
 	// Serve static files
 	mux.Handle("/", handler.Static(dir))
