@@ -99,6 +99,11 @@ func main() {
 				EnvVar: "REQ_LOGGER_FORMAT",
 				Value:  middleware.LogFormatCommon,
 			},
+			&cli.BoolFlag{
+				Name:   "debug",
+				Usage:  "Turn on debug mode",
+				EnvVar: "DEBUG",
+			},
 		},
 		Action: serve,
 	}
@@ -112,6 +117,10 @@ func serve(c *cli.Context) error {
 	dir := c.String("dir")
 	if dir == "" {
 		return errors.New("no static file directory set")
+	}
+
+	if !c.Bool("debug") {
+		logrus.SetLevel(logrus.FatalLevel)
 	}
 
 	// Start HTTP mux
