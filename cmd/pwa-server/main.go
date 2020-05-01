@@ -50,14 +50,14 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:   "env-js-prefix",
-				Usage:  "Dynamic JS env variables prefix",
+				Usage:  "Dynamic JS env variables prefix (eg: window.env.CONFIG_SOMEFLAG = true)",
 				Value:  "CONFIG_",
 				EnvVar: "ENV_JS_PREFIX",
 			},
 			&cli.StringFlag{
-				Name:   "env-js-key",
-				Usage:  "Which key to use when exposing the config to window",
-				Value:  "config",
+				Name:   "env-js-window-key",
+				Usage:  "Which key to use when exposing the config to window (eg: window.env)",
+				Value:  "env",
 				EnvVar: "ENV_JS_WINDOW_KEY",
 			},
 			&cli.StringFlag{
