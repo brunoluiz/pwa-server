@@ -15,6 +15,9 @@ archives:
   - format_overrides:
     - goos: 'windows'
       format: 'zip'
+    wrap_in_directory: true
+    files:
+      - README.md
 
 nfpms:
   - homepage: 'https://github.com/brunoluiz/go-pwa-server'
@@ -29,8 +32,6 @@ dockers:
     - 'brunoluiz/go-pwa-server:v{{ .Major }}.{{ .Minor }}'
     - 'brunoluiz/go-pwa-server:latest'
     dockerfile: 'Dockerfile.prod'
-    binaries:
-    - 'go-pwa-server'
 
 brews:
   - github:
