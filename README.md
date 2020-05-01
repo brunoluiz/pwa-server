@@ -8,6 +8,8 @@
 - Enable compression **by default**
 - Disable cache **by default**
 - Exposes /__/ready route **by default**
+- Exposes /__/metrics route **by default**
+- Supports not found redirects -- default is `index.html`, to support HTML5 PushState
 - Supports adding a base url as `<base href={base-url} />` in `<head>`, if specified
 - Supports adding a base url to `manifest.json`, if specified
 - Support allowing CORS *
