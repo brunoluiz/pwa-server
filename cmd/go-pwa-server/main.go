@@ -9,6 +9,7 @@ import (
 	"github.com/brunoluiz/go-pwa-server/envjs"
 	"github.com/brunoluiz/go-pwa-server/handler"
 	"github.com/brunoluiz/go-pwa-server/middleware"
+	"github.com/go-chi/chi"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -124,7 +125,9 @@ func serve(c *cli.Context) error {
 	}
 
 	// Start HTTP mux
-	mux := http.NewServeMux()
+	mux := chi.NewRouter()
+	// mux.Use(chi_middleware.Recoverer)
+	mux.NotFound(handler.NotFoundHandler().ServeHTTP)
 
 	// Operational handlers
 	mux.Handle(c.String("ready-route"), handler.Ready())
