@@ -80,6 +80,12 @@ func main() {
 				Usage:  "Enable gzip compression",
 				EnvVar: "NO_COMPRESSION",
 			},
+			&cli.StringFlag{
+				Name:   "not-found-file",
+				Usage:  "Redirect request to specific file if nothing was found on the route (index.html enables HTML Push State)",
+				EnvVar: "NOT_FOUND_FILE",
+				Value:  "index.html",
+			},
 			&cli.BoolFlag{
 				Name:   "cors",
 				Usage:  "Add CORS Origin, Method and Headers as *",
@@ -133,7 +139,7 @@ func serve(c *cli.Context) error {
 	mux.Handle(c.String("metrics-route"), promhttp.Handler())
 
 	// Serve static files
-	mux.Handle("/*", handler.Static(dir))
+	mux.Handle("/*", handler.Static(dir, c.String("not-found-file")))
 
 	// Create JS config route
 	logrus.Infof(
