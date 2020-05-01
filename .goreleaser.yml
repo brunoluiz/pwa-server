@@ -30,8 +30,8 @@ nfpms:
 
 dockers:
   - image_templates:
-    - 'brunoluiz/pwa-server:{{ .Tag }}'
-    - 'brunoluiz/pwa-server:v{{ .Major }}.{{ .Minor }}'
+    - 'brunoluiz/pwa-server:{{ .Version }}'
+    - 'brunoluiz/pwa-server:{{ .Major }}.{{ .Minor }}'
     - 'brunoluiz/pwa-server:latest'
     dockerfile: 'Dockerfile.prod'
 
