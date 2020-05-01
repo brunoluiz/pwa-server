@@ -43,14 +43,10 @@ func main() {
 				EnvVar: "METRICS_ROUTE",
 			},
 			&cli.StringFlag{
-				Name:   "base-url",
-				Usage:  "If set, adds <base href=value> on HTML heads",
-				EnvVar: "BASE_URL",
-			},
-			&cli.BoolFlag{
-				Name:   "no-manifest-base-url",
-				Usage:  "Disables base-url manipulations for manifest.json",
-				EnvVar: "NO_MANIFEST_BASE_URL",
+				Name:   "env-js-route",
+				Usage:  "JS config route",
+				EnvVar: "ENV_JS_ROUTE",
+				Value:  "/__/config.js",
 			},
 			&cli.StringFlag{
 				Name:   "env-js-prefix",
@@ -65,10 +61,14 @@ func main() {
 				EnvVar: "ENV_JS_WINDOW_KEY",
 			},
 			&cli.StringFlag{
-				Name:   "env-js-route",
-				Usage:  "JS config route",
-				EnvVar: "ENV_JS_ROUTE",
-				Value:  "/__/config.js",
+				Name:   "base-url",
+				Usage:  "If set, adds <base href=value> on HTML heads",
+				EnvVar: "BASE_URL",
+			},
+			&cli.BoolFlag{
+				Name:   "no-manifest-base-url",
+				Usage:  "Disables base-url manipulations for manifest.json",
+				EnvVar: "NO_MANIFEST_BASE_URL",
 			},
 			&cli.BoolFlag{
 				Name:   "allow-cache",
@@ -127,15 +127,13 @@ func serve(c *cli.Context) error {
 
 	// Start HTTP mux
 	mux := chi.NewRouter()
-	// mux.Use(chi_middleware.Recoverer)
-	// mux.NotFound(handler.NotFoundHandler().ServeHTTP)
 
 	// Operational handlers
 	mux.Handle(c.String("ready-route"), handler.Ready())
 	mux.Handle(c.String("metrics-route"), promhttp.Handler())
 
 	// Serve static files
-	mux.Get("/*", handler.Static(dir).ServeHTTP)
+	mux.Handle("/*", handler.Static(dir))
 
 	// Create JS config route
 	logrus.Infof(
